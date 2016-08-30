@@ -104,17 +104,9 @@ public class UserController {
     public String editUser(@PathVariable("id") int id, Model model){
         model.addAttribute("user", this.userService.getUserByID(id));
         model.addAttribute("listUsers", this.userService.listUsers());
-        listUsers(model);
         return "users";
     }
-
-    @RequestMapping("userdata/{id}")
-    public String userData(@PathVariable("id") int id, Model model){
-        model.addAttribute("user", this.userService.getUserByID(id));
-
-        return "userdata";
-    }
-
+    
     @RequestMapping(value = "/users/search", method = RequestMethod.POST)
     public String searchByName(@ModelAttribute("user") User user, Model model){
         model.addAttribute("user", new User());
