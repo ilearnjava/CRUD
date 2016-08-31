@@ -15,4 +15,9 @@ public interface UserService {
     public User getUserByID(int id);
     public List<User> listUsers();
     public List<User> searchByName(User user);
+
+    public void start();
+    public void pageDown();
+    public void pageUp();
+    public void end();
 }

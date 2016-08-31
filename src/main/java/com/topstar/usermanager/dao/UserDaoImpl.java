@@ -7,13 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 @Repository
 public class UserDaoImpl implements UserDao{
     private static final Logger logger = LoggerFactory.getLogger(UserDaoImpl.class);
-
+    private int pageNumber = 0;
     private SessionFactory sessionFactory;
 
     public void setSessionFactory(SessionFactory sessionFactory) {
@@ -58,10 +59,23 @@ public class UserDaoImpl implements UserDao{
     public List<User> listUsers() {
         Session session = this.sessionFactory.getCurrentSession();
         List<User> users = session.createQuery("from User").list();
-        for (User user : users) {
+        int size = users.size()/10;
+        int from = 0, to = 0;
+        if (pageNumber < size) {
+            from = pageNumber * 10;
+            to = from + 10;
+        } else if (pageNumber == size) {
+            from = pageNumber * 10;
+            to = users.size() - 1;
+        }
+        List<User> res = new ArrayList<User>();
+        if (users.size() >= from) {
+            res.addAll(users.subList(from, to));
+        }
+        for (User user : res) {
             logger.info("Users list: " + user);
         }
-        return users;
+        return res;
     }
 
     @Override
@@ -73,5 +87,32 @@ public class UserDaoImpl implements UserDao{
             logger.info("Users serchByName: " + u);
         }
         return users;
+    }
+
+    @Override
+    public void start() {
+        pageNumber = 0;
+    }
+
+    @Override
+    public void pageDown() {
+        if (pageNumber > 0) {
+            pageNumber -= 1;
+        }
+    }
+
+    @Override
+    public void pageUp() {
+        Session session = this.sessionFactory.getCurrentSession();
+        List<User> users = session.createQuery("from User").list();
+        if (users.size()/10 > pageNumber || (users.size()/10 == pageNumber & (users.size()/10)%pageNumber != 0))
+        {
+            pageNumber += 1;
+        }
+    }
+
+    @Override
+    public void end() {
+
     }
 }

@@ -57,4 +57,24 @@ public class UserServiceImpl implements UserService{
     public List<User> searchByName(User user) {
         return this.userDao.searchByName(user);
     }
+
+    @Override
+    public void start() {
+        userDao.start();
+    }
+
+    @Override
+    public void pageDown() {
+        userDao.pageDown();
+    }
+
+    @Override
+    public void pageUp() {
+        userDao.pageUp();
+    }
+
+    @Override
+    public void end() {
+        userDao.end();
+    }
 }

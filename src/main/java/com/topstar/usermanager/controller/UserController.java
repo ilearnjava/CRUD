@@ -19,7 +19,6 @@ import java.util.List;
 @Controller
 public class UserController {
     private UserService userService;
-    private int pageNumber = 0;
 
     @Autowired(required = true)
     @Qualifier(value = "userService")
@@ -30,23 +29,8 @@ public class UserController {
     @RequestMapping(value = "users", method = RequestMethod.GET)
     public String listUsers(Model model){
         List<User> userList = this.userService.listUsers();
-        int size = userList.size()/10;
-
-        int from = 0, to = 0;
-        if (pageNumber < size) {
-            from = pageNumber * 10;
-            to = from + 10;
-        } else if (pageNumber == size) {
-            from = pageNumber * 10;
-            to = userList.size() - 1;
-        }
-        List<User> res = new ArrayList<User>();
-        if (userList.size() >= from) {
-            res.addAll(userList.subList(from, to));
-        }
-
         model.addAttribute("user", new User());
-        model.addAttribute("listUsers", res);
+        model.addAttribute("listUsers", userList);
 
         return "users";
     }
@@ -54,42 +38,36 @@ public class UserController {
 
     @RequestMapping(value = "/users/start", method = RequestMethod.POST)
     public String start(Model model) {
-        pageNumber = 0;
+        userService.start();
         listUsers(model);
         return "users";
     }
     @RequestMapping(value = "/users/pagedown", method = RequestMethod.POST)
     public String pageDown(Model model) {
-        if (pageNumber > 0) {
-            pageNumber -= 1;
-        }
+        userService.pageDown();
         listUsers(model);
         return "users";
     }
     @RequestMapping(value = "/users/pageup", method = RequestMethod.POST)
     public String pageUp(Model model) {
-        if (this.userService.listUsers().size()/10 > pageNumber || (this.userService.listUsers().size()/10 == pageNumber & (this.userService.listUsers().size()/10)%pageNumber != 0))
-        {
-            pageNumber += 1;
-        }
+        userService.pageUp();
         listUsers(model);
         return "users";
     }
     @RequestMapping(value = "/users/end", method = RequestMethod.POST)
     public String end(Model model) {
+        userService.end();
         listUsers(model);
         return "users";
     }
 
     @RequestMapping(value = "/users/add", method = RequestMethod.POST)
     public String addUser(@ModelAttribute("user") User user){
-        pageNumber = 0;
         if(user.getId() == 0){
             this.userService.addUser(user);
         }else {
             this.userService.updateUser(user);
         }
-
         return "redirect:/users";
     }
 
@@ -106,7 +84,7 @@ public class UserController {
         model.addAttribute("listUsers", this.userService.listUsers());
         return "users";
     }
-    
+
     @RequestMapping(value = "/users/search", method = RequestMethod.POST)
     public String searchByName(@ModelAttribute("user") User user, Model model){
         model.addAttribute("user", new User());
